@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/training
+    password: vignesh
+    username: vignesh
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  application:
+    name: staffapplication
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8760/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: localhost
+
+server:
+  port: 8082

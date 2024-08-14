@@ -1,0 +1,75 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    container_name: docker_postgres
+    environment:
+      POSTGRES_USER: vignesh
+      POSTGRES_PASSWORD: vignesh
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+    restart: unless-stopped
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: docker_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    restart: unless-stopped
+    ports:
+      - 5050:80
+    networks:
+      - postgres
+  eureka-server-docker:
+    image: localeurekaserver:1.1
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    networks:
+      - eureka-network
+  student:
+    image: springstudenteurekaserverwithfeign:1.1
+    container_name: student_docker
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/training
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: training
+      EUREKA_HOST: eureka-server-docker
+    ports:
+      - "8081:8081"
+    networks:
+      - postgres
+      - eureka-network
+    depends_on:
+      - postgres
+      - eureka-server-docker
+  staff:
+    image: springstaffeurekaserverwithfeign:1.1
+    container_name: staff_docker
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DATABASE_HOST: postgres
+      DATABASE_NAME: training
+      DATABASE_PORT: 5432
+      EUREKA_HOST: eureka-server-docker
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - eureka-server-docker
+    networks:
+      - postgres
+      - eureka-network
+
+
+
+networks:
+  postgres:
+    driver: bridge
+  eureka-network:
+    driver: bridge
